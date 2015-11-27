@@ -31,6 +31,15 @@ class Applicative f => Monad f where
 
 infixr 1 =<<
 
+
+-- define <$> in terms of =<< and return:
+(<$>) ::
+    Monad f =>
+    (a -> b)
+    -> f a
+    -> f b
+a <$> b = (\x -> return (a x)) =<< b
+
 -- | Witness that all things with (=<<) and (<$>) also have (<*>).
 --
 -- >>> Id (+10) <*> Id 8
@@ -67,8 +76,8 @@ infixr 1 =<<
   f (a -> b)
   -> f a
   -> f b
-(<*>) =
-  error "todo: Course.Monad#(<*>)"
+
+a <*> b = (\f -> f <$> b) =<< a
 
 infixl 4 <*>
 
@@ -81,8 +90,7 @@ instance Monad Id where
     (a -> Id b)
     -> Id a
     -> Id b
-  (=<<) =
-    error "todo: Course.Monad (=<<)#instance Id"
+  f =<< Id a = f a
 
 -- | Binds a function on a List.
 --
@@ -93,8 +101,7 @@ instance Monad List where
     (a -> List b)
     -> List a
     -> List b
-  (=<<) =
-    error "todo: Course.Monad (=<<)#instance List"
+  (=<<) = flatMap
 
 -- | Binds a function on an Optional.
 --
@@ -106,7 +113,7 @@ instance Monad Optional where
     -> Optional a
     -> Optional b
   (=<<) =
-    error "todo: Course.Monad (=<<)#instance Optional"
+    bindOptional
 
 -- | Binds a function on the reader ((->) t).
 --
@@ -117,8 +124,7 @@ instance Monad ((->) t) where
     (a -> ((->) t b))
     -> ((->) t a)
     -> ((->) t b)
-  (=<<) =
-    error "todo: Course.Monad (=<<)#instance ((->) t)"
+  f =<< g = (\x -> f (g x) x)
 
 -- | Flattens a combined structure to a single structure.
 --
@@ -137,8 +143,7 @@ join ::
   Monad f =>
   f (f a)
   -> f a
-join =
-  error "todo: Course.Monad#join"
+join = (=<<) (\x -> x)
 
 -- | Implement a flipped version of @(=<<)@, however, use only
 -- @join@ and @(<$>)@.
@@ -151,8 +156,7 @@ join =
   f a
   -> (a -> f b)
   -> f b
-(>>=) =
-  flip (=<<)
+a >>= b = join (b <$> a)
 
 infixl 1 >>=
 
@@ -167,8 +171,7 @@ infixl 1 >>=
   -> (a -> f b)
   -> a
   -> f c
-(<=<) =
-  error "todo: Course.Monad#(<=<)"
+a <=< b = \x -> (a =<< (b x))
 
 infixr 1 <=<
 

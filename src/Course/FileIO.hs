@@ -83,8 +83,7 @@ getFiles =
 getFile ::
   FilePath
   -> IO (FilePath, Chars)
-getFile =
-  error "todo: Course.FileIO#getFile"
+getFile f = return (f , "abc")
 
 printFiles ::
   List (FilePath, Chars)
@@ -96,6 +95,5 @@ printFile ::
   FilePath
   -> Chars
   -> IO ()
-printFile =
-  error "todo: Course.FileIO#printFile"
+printFile = error ""
 
